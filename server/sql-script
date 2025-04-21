@@ -1,0 +1,143 @@
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    role VARCHAR(50) DEFAULT 'user',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE refresh_tokens (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id),
+    token VARCHAR(255) UNIQUE NOT NULL
+);
+
+CREATE TABLE tickets (
+    ticketID SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    status VARCHAR(50) DEFAULT 'new',
+    priority VARCHAR(50) DEFAULT 'low',
+    category VARCHAR(100) DEFAULT 'general',
+    assigned_to INTEGER REFERENCES assignees(employeeId) ON DELETE SET NULL,
+    created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    submitted TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    resolution TEXT DEFAULT '',
+    comments TEXT[]
+);
+
+CREATE TABLE assignees (
+    employeeId SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    role VARCHAR(50) DEFAULT 'assignee',
+    avatarUrl VARCHAR(255),
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+
+
+
+
+
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    role VARCHAR(20) CHECK (role IN ('admin', 'user', 'assignee')) DEFAULT 'user',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_active TIMESTAMP
+);
+
+CREATE TABLE assignees (
+    employee_id SERIAL PRIMARY KEY,
+    user_id INTEGER UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+    specialization VARCHAR(100) NOT NULL, -- Тип задач (например: 'hardware', 'software', 'network')
+    skills TEXT[], -- Массив навыков (например: ['Windows', 'Linux', 'Networking'])
+    current_workload INTEGER DEFAULT 0, -- Текущее количество активных заявок
+    max_workload INTEGER DEFAULT 5, -- Максимальное количество заявок
+    rating DECIMAL(3,2) DEFAULT 5.0, -- Рейтинг исполнителя
+    avatar_url VARCHAR(255),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE ticket_categories (
+    category_id SERIAL PRIMARY KEY,
+    name VARCHAR(100) UNIQUE NOT NULL,
+    description TEXT,
+    default_priority VARCHAR(20) CHECK (default_priority IN ('low', 'medium', 'high', 'critical'))
+);
+
+CREATE TABLE tickets (
+    ticket_id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    status VARCHAR(20) CHECK (status IN ('new', 'assigned', 'in_progress', 'resolved', 'closed')) DEFAULT 'new',
+    priority VARCHAR(20) CHECK (priority IN ('low', 'medium', 'high', 'critical')) DEFAULT 'low',
+    category_id INTEGER REFERENCES ticket_categories(category_id),
+    assigned_to INTEGER REFERENCES assignees(employee_id) ON DELETE SET NULL,
+    created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    resolved_at TIMESTAMP,
+    estimated_time INTERVAL, -- Предполагаемое время решения (для ML)
+    actual_time INTERVAL, -- Фактическое время решения
+    ai_confidence DECIMAL(3,2), -- Уверенность ИИ в классификации
+    attachments TEXT[] -- Ссылки на прикрепленные файлы
+);
+
+CREATE TABLE ticket_history (
+    history_id SERIAL PRIMARY KEY,
+    ticket_id INTEGER REFERENCES tickets(ticket_id) ON DELETE CASCADE,
+    changed_field VARCHAR(50) NOT NULL,
+    old_value TEXT,
+    new_value TEXT,
+    changed_by INTEGER REFERENCES users(id),
+    changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE ticket_comments (
+    comment_id SERIAL PRIMARY KEY,
+    ticket_id INTEGER REFERENCES tickets(ticket_id) ON DELETE CASCADE,
+    author_id INTEGER REFERENCES users(id),
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_internal BOOLEAN DEFAULT FALSE -- Для внутренних заметок
+);
+
+CREATE TABLE ml_models (
+    model_id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    version VARCHAR(50) NOT NULL,
+    purpose VARCHAR(255) NOT NULL, -- 'classification', 'priority', 'assignment'
+    accuracy DECIMAL(5,4),
+    last_trained TIMESTAMP,
+    is_active BOOLEAN DEFAULT TRUE
+);
+
+CREATE TABLE model_predictions (
+    prediction_id SERIAL PRIMARY KEY,
+    ticket_id INTEGER REFERENCES tickets(ticket_id) ON DELETE CASCADE,
+    model_id INTEGER REFERENCES ml_models(model_id),
+    predicted_category INTEGER REFERENCES ticket_categories(category_id),
+    predicted_priority VARCHAR(20),
+    suggested_assignee INTEGER REFERENCES assignees(employee_id),
+    confidence DECIMAL(3,2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE refresh_tokens (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id),
+    token VARCHAR(255) UNIQUE NOT NULL
+);
+
+CREATE TABLE assignee_specializations (
+    specialization_id SERIAL PRIMARY KEY,
+    assignee_id INTEGER REFERENCES assignees(employee_id) ON DELETE CASCADE,
+    category_id INTEGER REFERENCES ticket_categories(category_id) ON DELETE CASCADE
+);
