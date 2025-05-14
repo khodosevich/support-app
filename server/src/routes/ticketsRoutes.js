@@ -2,41 +2,155 @@ const express = require('express');
 const pool = require('../utils/db');
 require('dotenv').config();
 const authenticateToken = require('../middleware/authenticateToken');
-const { assignTicketToBestAssignee } = require('./ticketService');
-
+const axios = require('axios');
 const router = express.Router();
 
 // Создание заявки (доступно всем авторизованным пользователям)
 router.post('/tickets', authenticateToken, async (req, res) => {
-	const { title, description, category } = req.body;
+	const { title, description } = req.body;
+	const userId = req.user.id;
 
 	if (!title || !description) {
 		return res.status(400).json({ error: 'Title and description are required' });
 	}
 
 	try {
-		const autoCategory = category || 'uncategorized';
-		const autoPriority = 'medium';
+		// 1. Получаем прогноз от модели
+		const response = await axios.post('http://127.0.0.1:8000/predict', {
+			text: `${title} ${description}`
+		});
 
-		const result = await pool.query(
-			`INSERT INTO tickets
-                 (title, description, status, priority, category_id, created_by)
-             VALUES ($1, $2, 'new', $3,
-                     (SELECT category_id FROM ticket_categories WHERE name = $4), $5) RETURNING *`,
-			[title, description, autoPriority, autoCategory, req.user.id],
+		const modelPrediction = response.data;
+		const predictedCategory = modelPrediction.category_name;
+		const predictedPriority = modelPrediction.priority || 'medium';
+		const confidence = modelPrediction.confidence || 0.0;
+
+		// 2. Получаем ID категории через связь с переводом
+		const categoryResult = await pool.query(
+			`SELECT tc.category_id, tc.name as category_name
+             FROM category_translations ct
+                      JOIN ticket_categories tc ON ct.category_ru = tc.name
+             WHERE ct.category_en = $1`,
+			[predictedCategory]
 		);
 
-		const newTicket = result.rows[0];
+		if (categoryResult.rows.length === 0) {
+			return res.status(400).json({
+				error: `Unknown category: ${predictedCategory}`,
+				details: 'No matching category found in database'
+			});
+		}
 
-		//const assignedTicket = await assignTicketToBestAssignee(newTicket.ticket_id);
+		const categoryId = categoryResult.rows[0].category_id;
 
-		res.status(201).json(newTicket); // временно возвращаем только newTicket
-	}
-	catch (error) {
+		// 3. Ищем подходящего исполнителя (по специализации, нагрузке и рейтингу)
+		const assigneeResult = await pool.query(
+			`SELECT employee_id
+             FROM assignees
+             WHERE specialization = $1
+               AND current_workload < max_workload
+             ORDER BY current_workload ASC, rating DESC
+                 LIMIT 1`,
+			[predictedCategory]
+		);
+
+		const assigneeId = assigneeResult.rows[0]?.employee_id || null;
+
+		// 4. Создаем заявку
+		const ticketResult = await pool.query(
+			`INSERT INTO tickets
+             (title, description, status, priority, category_id,
+              created_by, assigned_to, ai_confidence)
+             VALUES ($1, $2, 'new', $3, $4, $5, $6, $7)
+                 RETURNING *`,
+			[
+				title,
+				description,
+				predictedPriority,
+				categoryId,
+				userId,
+				assigneeId,
+				confidence
+			]
+		);
+
+		const newTicket = ticketResult.rows[0];
+
+		// 5. Добавляем запись в историю
+		await pool.query(
+			`INSERT INTO ticket_history
+                 (ticket_id, changed_field, new_value, changed_by)
+             VALUES ($1, 'status', 'new', $2)`,
+			[newTicket.ticket_id, userId]
+		);
+
+		// 6. Увеличиваем нагрузку на исполнителя, если назначен
+		if (assigneeId) {
+			await pool.query(
+				`UPDATE assignees
+                 SET current_workload = current_workload + 1
+                 WHERE employee_id = $1`,
+				[assigneeId]
+			);
+		}
+
+		// 7. Возвращаем полную информацию о заявке
+		const fullTicket = await getTicketWithDetails(newTicket.ticket_id);
+
+		console.log(fullTicket);
+
+		res.status(201).json({
+			...fullTicket,
+			ai_analysis: {
+				category: predictedCategory,
+				priority: predictedPriority,
+				confidence: confidence,
+				assignee_suggestion: assigneeId ? {
+					employee_id: assigneeId,
+					specialization: predictedCategory
+				} : null
+			}
+		});
+	} catch (error) {
 		console.error('Error creating ticket:', error);
-		res.status(500).json({ error: 'Internal server error' });
+
+		let errorMessage = 'Internal server error';
+		let statusCode = 500;
+
+		if (error.response?.data) {
+			errorMessage = 'Prediction service error';
+			statusCode = 502;
+		} else if (error.code === 'ECONNREFUSED') {
+			errorMessage = 'Prediction service unavailable';
+			statusCode = 503;
+		}
+
+		res.status(statusCode).json({
+			error: errorMessage,
+			details: error.message,
+			...(error.response?.data && { prediction_error: error.response.data })
+		});
 	}
 });
+
+// Вспомогательная функция для получения полной информации о заявке
+async function getTicketWithDetails(ticketId) {
+	const result = await pool.query(
+		`SELECT t.*, 
+                tc.name as category_name,
+                u.username as created_by_username,
+                a.user_id as assignee_user_id,
+                au.username as assignee_username
+         FROM tickets t
+         LEFT JOIN ticket_categories tc ON t.category_id = tc.category_id
+         LEFT JOIN users u ON t.created_by = u.id
+         LEFT JOIN assignees a ON t.assigned_to = a.employee_id
+         LEFT JOIN users au ON a.user_id = au.id
+         WHERE t.ticket_id = $1`,
+		[ticketId]
+	);
+	return result.rows[0];
+}
 
 // Получение списка заявок (пользователь — свои, админ — все)
 router.get('/tickets', authenticateToken, async (req, res) => {

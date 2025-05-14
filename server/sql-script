@@ -3,51 +3,6 @@ CREATE TABLE users (
     username VARCHAR(50) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
-    role VARCHAR(50) DEFAULT 'user',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE refresh_tokens (
-    id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES users(id),
-    token VARCHAR(255) UNIQUE NOT NULL
-);
-
-CREATE TABLE tickets (
-    ticketID SERIAL PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    description TEXT NOT NULL,
-    status VARCHAR(50) DEFAULT 'new',
-    priority VARCHAR(50) DEFAULT 'low',
-    category VARCHAR(100) DEFAULT 'general',
-    assigned_to INTEGER REFERENCES assignees(employeeId) ON DELETE SET NULL,
-    created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
-    submitted TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    resolution TEXT DEFAULT '',
-    comments TEXT[]
-);
-
-CREATE TABLE assignees (
-    employeeId SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    role VARCHAR(50) DEFAULT 'assignee',
-    avatarUrl VARCHAR(255),
-    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-
-
-
-
-
-
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
     role VARCHAR(20) CHECK (role IN ('admin', 'user', 'assignee')) DEFAULT 'user',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_active TIMESTAMP

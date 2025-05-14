@@ -40,7 +40,6 @@ app.use('/', ticketsRoutes);
 app.use('/', assigneesRoutes);
 app.use('/', commentsRoutes);
 app.use('/ticket-categories', categoryRoutes);
-//app.use('/ml', mlRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
