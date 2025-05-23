@@ -1,13 +1,15 @@
 import React, { useContext, useState } from 'react';
-import { AlertContextType, AssigneesType, OpenModal } from '../../types/type.ts';
-import { Box, Button, Dialog, MenuItem, Select, SelectChangeEvent, Typography, useTheme } from '@mui/material';
+import { Box, Dialog, Typography, useTheme } from '@mui/material';
 import { StyledInput } from '../../ui/StyledInput.tsx';
 import { StyledBtn } from '../../ui/StyledBtn.tsx';
+import { AlertContextType, AssigneesType, OpenModal } from '../../types/type.ts';
 import { AlertContext } from '../../utils/AlertContext.tsx';
 import { methods } from '../../api/methods.ts';
 import { AssigneesContext } from '../../utils/AssigneesContext.tsx';
+import { Select, MenuItem } from '@mui/material';
 
 const NewAssignees: React.FC<OpenModal> = ({ open, setOpen }) => {
+	const theme = useTheme();
 	const [newAssignees, setNewAssignees] = useState<AssigneesType>({
 		email: '',
 		username: '',
@@ -17,16 +19,10 @@ const NewAssignees: React.FC<OpenModal> = ({ open, setOpen }) => {
 
 	const { setAlert }: AlertContextType = useContext(AlertContext);
 	const { setAssignees } = useContext(AssigneesContext);
-	const theme = useTheme();
 
 	const handleClose = () => {
 		setOpen(false);
-		setNewAssignees({
-			email: '',
-			username: '',
-			password: '',
-			role: 'assignee',
-		})
+		setNewAssignees({ email: '', username: '', password: '', role: 'assignee' });
 	};
 
 	const createNewAssignees = async () => {
@@ -46,14 +42,13 @@ const NewAssignees: React.FC<OpenModal> = ({ open, setOpen }) => {
 				handleClose();
 				setAlert({ type: 'success', isShowAlert: true, message: 'Новый сотрудник создан!' });
 			}
-		}
-		catch (e) {
-			console.log(e);
+		} catch (e) {
+			console.error(e);
 			setAlert({ type: 'error', isShowAlert: true, message: 'Сервер не отвечает, попробуйте еще раз!' });
 		}
 	};
 
-	const handleChange = (event: SelectChangeEvent) => {
+	const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
 		setNewAssignees(prevState => ({ ...prevState, role: event.target.value as string }));
 	};
 
@@ -61,102 +56,88 @@ const NewAssignees: React.FC<OpenModal> = ({ open, setOpen }) => {
 		<Dialog
 			open={open}
 			onClose={handleClose}
+			fullWidth
+			maxWidth="sm"
 			PaperProps={{
 				sx: {
-					backgroundColor: theme.palette.background.paper,
-					borderRadius: '20px',
-					padding: '20px',
-				}
+					borderRadius: '12px',
+					background: theme.palette.background.paper,
+					padding: theme.spacing(4),
+				},
 			}}
 		>
 			<Box sx={{
 				display: 'flex',
 				flexDirection: 'column',
-				alignItems: 'center',
-				justifyContent: 'center',
-				gap: '15px',
+				gap: theme.spacing(3),
 			}}>
-				<Box sx={{ width: '100%' }}>
-					<Typography sx={{
-						fontWeight: 'bold',
-						marginBottom: '7px',
-						color: theme.palette.text.primary,
-					}}>
+				<Typography variant="h6" sx={{
+					fontWeight: 600,
+					color: theme.palette.text.primary,
+				}}>
+					Создать нового сотрудника
+				</Typography>
+
+				<Box>
+					<Typography variant="subtitle1" sx={{ mb: 1, color: theme.palette.text.primary }}>
 						ФИО
 					</Typography>
 					<StyledInput
 						value={newAssignees.username}
-						onChange={(e) => setNewAssignees((prev) => ({ ...prev, username: e.target.value }))}
-						placeholder={'Введите ФИО'}
-						type={'text'}
+						onChange={(e) => setNewAssignees(prev => ({ ...prev, username: e.target.value }))}
+						placeholder="Введите ФИО"
+						type="text"
 					/>
 				</Box>
-				<Box sx={{ width: '100%' }}>
-					<Typography sx={{
-						fontWeight: 'bold',
-						marginBottom: '7px',
-						color: theme.palette.text.primary,
-					}}>
+
+				<Box>
+					<Typography variant="subtitle1" sx={{ mb: 1, color: theme.palette.text.primary }}>
 						Email
 					</Typography>
 					<StyledInput
 						value={newAssignees.email}
-						onChange={(e) => setNewAssignees((prev) => ({ ...prev, email: e.target.value }))}
-						placeholder={'Введите email'}
-						type={'email'}
+						onChange={(e) => setNewAssignees(prev => ({ ...prev, email: e.target.value }))}
+						placeholder="Введите email"
+						type="email"
 					/>
 				</Box>
 
-				<Box sx={{ width: '100%' }}>
-					<Typography sx={{
-						fontWeight: 'bold',
-						marginBottom: '7px',
-						color: theme.palette.text.primary,
-					}}>
+				<Box>
+					<Typography variant="subtitle1" sx={{ mb: 1, color: theme.palette.text.primary }}>
 						Пароль
 					</Typography>
 					<StyledInput
 						value={newAssignees.password}
-						onChange={(e) => setNewAssignees((prev) => ({ ...prev, password: e.target.value }))}
-						placeholder={'Введите пароль'}
-						type={'password'}
+						onChange={(e) => setNewAssignees(prev => ({ ...prev, password: e.target.value }))}
+						placeholder="Введите пароль"
+						type="password"
 					/>
 				</Box>
 
-				<Select
-					value={newAssignees.role}
-					onChange={handleChange}
-					fullWidth
-					sx={{
-						color: theme.palette.text.primary,
-						'& .MuiOutlinedInput-notchedOutline': {
-							borderColor: theme.palette.divider,
-						},
-					}}
-				>
-					<MenuItem value={'user'}>Пользователь</MenuItem>
-					<MenuItem value={'admin'}>Администратор</MenuItem>
-					<MenuItem value={'assignee'}>Сотрудник</MenuItem>
-				</Select>
-
-				<Box sx={{
-					display: 'flex',
-					flexDirection: 'column',
-					gap: '10px',
-					width: '100%',
-				}}>
-					<StyledBtn onClick={createNewAssignees}>
-						Создать
-					</StyledBtn>
-					<Button
-						onClick={handleClose}
+				<Box>
+					<Typography variant="subtitle1" sx={{ mb: 1, color: theme.palette.text.primary }}>
+						Роль
+					</Typography>
+					<Select
+						value={newAssignees.role}
+						onChange={handleChange}
+						fullWidth
 						sx={{
-							color: theme.palette.error.main,
+							color: theme.palette.text.primary,
+							'& .MuiOutlinedInput-notchedOutline': {
+								borderColor: theme.palette.divider,
+							},
 						}}
 					>
-						Отменить
-					</Button>
+						<MenuItem value={'user'}>Пользователь</MenuItem>
+						<MenuItem value={'admin'}>Администратор</MenuItem>
+						<MenuItem value={'assignee'}>Сотрудник</MenuItem>
+					</Select>
 				</Box>
+
+				<StyledBtn onClick={createNewAssignees}>
+					Создать
+				</StyledBtn>
 			</Box>
 		</Dialog>
 	);

@@ -5,7 +5,7 @@ import { AlertContextType, UserType } from '../types/type.ts';
 import { AlertContext } from '../utils/AlertContext.tsx';
 import { Box, Button, Typography, useTheme } from '@mui/material';
 import MyFormControl from '../components/MyFormControl.tsx';
-import { NavLink } from 'react-router';
+import { NavLink, useNavigate } from 'react-router';
 
 const Profile = () => {
 	const theme = useTheme();
@@ -31,6 +31,24 @@ const Profile = () => {
 		newPassword: '',
 	});
 
+	const setNullUserData = () => {
+		setCurrentUser({
+			id: 0,
+			username: '',
+			email: '',
+			role: '',
+			created_at: '',
+		});
+
+		setNewUserData({
+			id: 0,
+			username: '',
+			email: '',
+			role: '',
+			created_at: '',
+		});
+	};
+
 	useEffect(() => {
 		const fetchUserById = async () => {
 			try {
@@ -46,16 +64,91 @@ const Profile = () => {
 		fetchUserById();
 	}, [user.id, setAlert]);
 
-	const handleEditAccount = async () => {
-		// Реализация сохранения изменений
-	};
-
 	const handleDeleteAccount = async () => {
-		// Реализация удаления аккаунта
+		try {
+			await methods.users.deleteUser(user!.id);
+			setAlert({ type: 'success', isShowAlert: true, message: 'Пользователь удален!' });
+			setNullUserData();
+			navigate('/login');
+		}
+		catch {
+			setAlert({ type: 'error', isShowAlert: true, message: 'Ошибка удаления!' });
+		}
 	};
 
+	const handleEditAccount = async () => {
+		const isPasswordChanged = password.password && password.newPassword;
+		const isUserDataChanged =
+			newUserData.username !== currentUser.username ||
+			newUserData.email !== currentUser.email;
+
+		if (!isPasswordChanged && !isUserDataChanged) {
+			setAlert({
+				type: 'info',
+				isShowAlert: true,
+				message: 'Нет изменений для сохранения.',
+			});
+			return;
+		}
+
+		if (isPasswordChanged) {
+			try {
+				await methods.users.updateUserPassword(user!.id, password);
+				setPassword({ password: '', newPassword: '' });
+
+				setAlert({
+					type: 'success',
+					isShowAlert: true,
+					message: 'Пароль обновлен!',
+				});
+			}
+			catch {
+				setAlert({
+					type: 'error',
+					isShowAlert: true,
+					message: 'Ошибка при обновлении пароля!',
+				});
+				return;
+			}
+		}
+
+		if (isUserDataChanged) {
+			try {
+				await methods.users.updateUser(user!.id, {
+					username: newUserData.username,
+					email: newUserData.email,
+				});
+
+				setCurrentUser(newUserData);
+
+				setAlert({
+					type: 'success',
+					isShowAlert: true,
+					message: 'Пользователь обновлен!',
+				});
+			}
+			catch {
+				setNewUserData(currentUser);
+				setAlert({
+					type: 'error',
+					isShowAlert: true,
+					message: 'Ошибка при обновлении профиля!',
+				});
+			}
+		}
+	};
+
+	const navigate = useNavigate();
 	const logoutHandler = async () => {
-		// Реализация выхода
+		try {
+			await methods.auth.logout();
+			localStorage.removeItem('accessToken');
+			localStorage.removeItem('refreshToken');
+			navigate('/login');
+		}
+		catch {
+			setAlert({ type: 'error', isShowAlert: true, message: 'Ошибка при выходе!' });
+		}
 	};
 
 	return (

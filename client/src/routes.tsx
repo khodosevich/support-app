@@ -12,7 +12,7 @@ import Users from './pages/Users.tsx';
 import ProfileById from './pages/ProfileById.tsx';
 import AssigneeProfile from './pages/AssigneeProfile.tsx';
 import AssigneeTickets from './pages/AssigneeTickets.tsx';
-import CategoriesList from './components/category/CategoriesList.tsx';
+import CategoriesList from './pages/CategoriesList.tsx';
 
 export const ProtectedRoute = ({ isAuth, children }: { isAuth: boolean, children: JSX.Element }) => {
 	if (!isAuth) {

@@ -80,8 +80,9 @@ const UpdateAssignees: React.FC<UpdateAssigneesType> = ({open, setOpen, email, u
 					flexDirection: 'column',
 					gap: '16px',
 					padding: 0,
+					width: '100%',
 				}}>
-					<Box>
+					<Box sx={{ width: '100%' }}>
 						<Typography sx={{
 							fontWeight: 'bold',
 							marginBottom: '7px',
@@ -96,7 +97,7 @@ const UpdateAssignees: React.FC<UpdateAssigneesType> = ({open, setOpen, email, u
 							type={'text'}
 						/>
 					</Box>
-					<Box>
+					<Box sx={{ width: '100%' }}>
 						<Typography sx={{
 							fontWeight: 'bold',
 							marginBottom: '7px',

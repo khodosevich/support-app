@@ -3,11 +3,11 @@ import {
 	Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
 	Paper, Button, Chip, Box, Typography, useTheme
 } from '@mui/material';
-import { methods } from '../../api/methods';
-import { AlertContextType } from '../../types/type';
-import { AlertContext } from '../../utils/AlertContext';
+import { methods } from '../api/methods.ts';
+import { AlertContextType } from '../types/type.ts';
+import { AlertContext } from '../utils/AlertContext.tsx';
 import { useContext } from 'react';
-import CategoryEditModal from './CategoryEditModal.tsx';
+import CategoryEditModal from '../components/category/CategoryEditModal.tsx';
 
 interface Category {
 	category_id: number;

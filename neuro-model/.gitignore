@@ -1,0 +1,5 @@
+.idea
+bert_env
+ticket_classifier
+ticket_classifier.onnx
+results
