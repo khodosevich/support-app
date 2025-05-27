@@ -82,7 +82,7 @@ async def predict(request: TextRequest):
             "category_name": reverse_category_mapping[predicted_category],
             "category_confidence": category_confidence,
             "priority": predicted_priority,
-            "priority_name": reverse_priority_mapping[predicted_priority],
+            "priority_name": reverse_priority_mapping.get(predicted_priority, "undefined"),
             "priority_confidence": priority_confidence,
             "text": request.text
         }
