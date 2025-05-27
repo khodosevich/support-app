@@ -22,7 +22,7 @@ router.post('/tickets', authenticateToken, async (req, res) => {
 
 		const modelPrediction = response.data;
 		const predictedCategory = modelPrediction.category_name;
-		const predictedPriority = modelPrediction.priority || 'medium';
+		const predictedPriority = modelPrediction.priority_name || 'medium';
 		const confidence = modelPrediction.confidence || 0.0;
 
 		// 2. Получаем ID категории через связь с переводом
@@ -138,7 +138,7 @@ async function getTicketWithDetails(ticketId) {
 	const result = await pool.query(
 		`SELECT t.*, 
                 tc.name as category_name,
-                u.username as created_by_username,
+                u.username as username,
                 a.user_id as assignee_user_id,
                 au.username as assignee_username
          FROM tickets t

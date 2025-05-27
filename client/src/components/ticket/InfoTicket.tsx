@@ -1,13 +1,26 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Grid, Typography, useTheme } from '@mui/material';
 import TextInfo from '../TextInfo.tsx';
 import { TicketsItemType } from '../../types/type.ts';
 import { NavLink } from 'react-router';
+import { methods } from '../../api/methods.ts';
 
 const InfoTicket: React.FC<TicketsItemType> = ({ created_by, category_id, created_at, ticket_id, title, ticketUserName }) => {
 	const theme = useTheme();
+	const [currentCategories, setCurrentCategories] = useState<string>('');
 
-	console.log(created_by);
+	useEffect(() => {
+		const fetch = async () => {
+			try {
+				const response = await methods.categories.getCategories();
+				console.log(response.data.find((i: { category_id: number | null; }) => i.category_id === category_id).name);
+				setCurrentCategories(response.data.find((i: { category_id: number | null; }) => i.category_id === category_id).name);
+			} catch {
+				console.log('Error fetching categories.');
+			}
+		}
+		fetch();
+	}, [ticket_id]);
 
 	return (
 		<Grid container spacing={2}>
@@ -36,7 +49,7 @@ const InfoTicket: React.FC<TicketsItemType> = ({ created_by, category_id, create
 							textDecoration: 'none',
 							'&:hover': {
 								textDecoration: 'underline',
-							}
+							},
 						}}
 					>
 						{ticketUserName}
@@ -51,7 +64,7 @@ const InfoTicket: React.FC<TicketsItemType> = ({ created_by, category_id, create
 				gap: '10px',
 			}}>
 				<TextInfo title={'Создано'} value={new Date(created_at).toLocaleDateString()}/>
-				<TextInfo title={'Категория'} value={category_id?.toString() ?? 'Не указано'} />
+				<TextInfo title={'Категория'} value={currentCategories ?? 'Не указано'} />
 			</Grid>
 			<Grid item xs={4} sx={{
 				display: 'flex',
