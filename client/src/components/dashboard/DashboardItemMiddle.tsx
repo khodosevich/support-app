@@ -28,7 +28,7 @@ const DashboardItemMiddle: React.FC<DashboardItemMiddleType> = ({subtitle, path}
 						      textDecoration: 'underline',
 					      }
 				      }}>
-					View All
+					Показать все
 				</Link>
 			</Typography>
 		</Box>

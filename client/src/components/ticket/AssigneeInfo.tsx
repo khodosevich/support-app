@@ -18,7 +18,7 @@ const priorityColors: Record<string, 'default' | 'info' | 'warning' | 'error'> =
 const statusLabelMap: Record<string, string> = {
 	new: 'Новая',
 	assigned: 'Назначена',
-	in_progress: 'В процессе',
+	in_progress: 'В работе',
 	resolved: 'Решена',
 	closed: 'Закрыта',
 };

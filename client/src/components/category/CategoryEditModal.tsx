@@ -39,7 +39,7 @@ const CategoryEditModal = ({ open, onClose, category, onSuccess }: CategoryEditM
 					default_priority: defaultPriority,
 				});
 				if (response.status === 200) {
-					setAlert({ type: 'success', isShowAlert: true, message: 'Category updated successfully' });
+					setAlert({ type: 'success', isShowAlert: true, message: 'Категория обновлена успешно' });
 					onSuccess();
 					onClose();
 				}
@@ -50,14 +50,14 @@ const CategoryEditModal = ({ open, onClose, category, onSuccess }: CategoryEditM
 					default_priority: defaultPriority,
 				});
 				if (response.status === 201) {
-					setAlert({ type: 'success', isShowAlert: true, message: 'Category created successfully' });
+					setAlert({ type: 'success', isShowAlert: true, message: 'Категория сохранена успешно' });
 					onSuccess();
 					onClose();
 				}
 			}
 		}
 		catch (error) {
-			setAlert({ type: 'error', isShowAlert: true, message: 'Error saving category' });
+			setAlert({ type: 'error', isShowAlert: true, message: 'Ошибка сохранения категории' });
 			console.error('Error saving category:', error);
 		}
 		finally {

@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { Box, TextField, Button, List, ListItem, ListItemText, Typography, Chip, Divider, useTheme } from '@mui/material';
 import { AlertContext } from '../../utils/AlertContext.tsx';
 import { methods } from '../../api/methods.ts';
+import { UserContext } from '../../utils/UserContext.tsx';
 
 interface Comment {
 	comment_id: number;
@@ -60,6 +61,9 @@ const TicketComments = ({ ticketId }: TicketCommentsProps) => {
 		}
 	};
 
+	const { user } = useContext(UserContext);
+	const isUser = user.role === 'user';
+
 	return (
 		<Box sx={{
 			backgroundColor: theme.palette.background.paper,
@@ -90,12 +94,15 @@ const TicketComments = ({ ticketId }: TicketCommentsProps) => {
 					}}
 				/>
 				<Box mt={1} display="flex" justifyContent="space-between" alignItems="center">
-					<Chip
-						label="Internal"
-						color={isInternal ? 'primary' : 'default'}
-						onClick={() => setIsInternal(!isInternal)}
-						variant={isInternal ? 'filled' : 'outlined'}
-					/>
+					{
+						!isUser && 	<Chip
+							label="Внутренний"
+							color={isInternal ? 'primary' : 'default'}
+							onClick={() => setIsInternal(!isInternal)}
+							variant={isInternal ? 'filled' : 'outlined'}
+						/>
+					}
+
 					<Button
 						variant="contained"
 						color="primary"

@@ -18,61 +18,61 @@ const SideIcons = () => {
 				return [
 					{
 						src: dashboardIcon,
-						name: 'Dashboard',
+						name: 'Главная страница',
 						path: '/dashboard',
-						tooltip: 'Dashboard',
+						tooltip: 'Главная страница',
 					},
 					{
 						src: ticketsIcon,
-						name: 'Tickets',
+						name: 'Заявки',
 						path: '/tickets',
 						tooltip: 'Заявки',
 					},
 					{
 						src: assigneesIcon,
-						name: 'Assignees',
+						name: 'Сотрудники',
 						path: '/assignees',
 						tooltip: 'Сотрудники',
 					},
 					{
 						src: profileIcon,
-						name: 'Profile',
+						name: 'Профиль',
 						path: '/profile',
 						tooltip: 'Профиль',
 					},
 					{
 						src: modeIcon,
-						name: 'User Mode',
+						name: 'Выйти',
 						path: '/login',
 						variant: 'outlined',
-						tooltip: 'Изменить мод',
+						tooltip: 'Выйти',
 					},
 				];
 			case 'assignee':
 				return [
 					{
 						src: assigneeTickets,
-						name: 'My Tasks',
+						name: 'Мои задачи',
 						path: '/tickets/assignee',
 						tooltip: 'Мои задачи',
 					},
 					{
 						src: ticketsIcon,
-						name: 'All Tickets',
+						name: 'Все заявки',
 						path: '/tickets',
 						tooltip: 'Все заявки',
 					},
 					{
 						src: profileIcon,
-						name: 'Profile',
+						name: 'Профиль',
 						path: `/assignees/${user.id}`,
 						tooltip: 'Профиль',
 					},
 					{
 						src: modeIcon,
-						name: 'Admin Mode',
+						name: 'Выйти',
 						path: '/login',
-						tooltip: 'Изменить режим',
+						tooltip: 'Выйти',
 					},
 				];
 			case 'user':
@@ -80,21 +80,21 @@ const SideIcons = () => {
 				return [
 					{
 						src: ticketsIcon,
-						name: 'My Tickets',
+						name: 'Мои заявки',
 						path: '/tickets',
 						tooltip: 'Мои заявки',
 					},
 					{
 						src: profileIcon,
-						name: 'Profile',
+						name: 'Профиль',
 						path: '/profile',
 						tooltip: 'Профиль',
 					},
 					{
 						src: modeIcon,
-						name: 'Admin Mode',
+						name: 'Выйти',
 						path: '/login',
-						tooltip: 'Изменить режим',
+						tooltip: 'Выйти',
 					},
 				];
 		}

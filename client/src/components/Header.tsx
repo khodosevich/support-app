@@ -11,10 +11,9 @@ import ThemeSwitch from './ThemeSwitch.tsx';
 
 const Header = () => {
 	const location = useLocation().pathname.split('/')[1];
-	const headerTitle = location.charAt(0).toUpperCase() + location.slice(1);
 	const { user } = useContext(UserContext);
 	const isAdmin = user.role === 'admin';
-	const isAssigneesPage = headerTitle === 'Assignees';
+	const isAssigneesPage = location === 'assignees';
 	const { setSidebar } = useContext(SidebarContext);
 
 	const theme = useTheme();
@@ -27,6 +26,13 @@ const Header = () => {
 
 	useEffect(() => {
 	}, [isAssigneesPage]);
+
+	enum headerTitleRu {
+		tickets= 'Заявки',
+		assignees = 'Сотрудники',
+		dashboard ='Главная страница',
+		profile = 'Профиль'
+	}
 
 	return (
 		<header style={{
@@ -74,7 +80,7 @@ const Header = () => {
 						fontSize: '20px',
 						fontWeight: '900',
 					}}>
-						{headerTitle}
+						{headerTitleRu[location as keyof typeof headerTitleRu]}
 					</Typography>
 				</Box>
 				<Box sx={{

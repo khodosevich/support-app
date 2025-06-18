@@ -13,7 +13,6 @@ const InfoTicket: React.FC<TicketsItemType> = ({ created_by, category_id, create
 		const fetch = async () => {
 			try {
 				const response = await methods.categories.getCategories();
-				console.log(response.data.find((i: { category_id: number | null; }) => i.category_id === category_id).name);
 				setCurrentCategories(response.data.find((i: { category_id: number | null; }) => i.category_id === category_id).name);
 			} catch {
 				console.log('Error fetching categories.');

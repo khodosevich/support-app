@@ -9,6 +9,7 @@ import { AlertContext } from '../utils/AlertContext.tsx';
 import TicketUpdatePopup from '../components/ticket/TicketUpdatePopup.tsx';
 import TicketComments from '../components/ticket/TicketComments.tsx';
 import Button from '@mui/material/Button';
+import { UserContext } from '../utils/UserContext.tsx';
 
 const Ticket = () => {
 	const { id } = useParams();
@@ -52,21 +53,26 @@ const Ticket = () => {
 		fetchTicket();
 	}, [updateTicket]);
 
+	const { user } = useContext(UserContext);
+	const isUser = user.role === 'user';
+
 	return (
 		<Grid container spacing={3}>
 			<Grid item xs={8}>
 				<AboutTicket {...currentTicket} setUpdateTicket={setUpdateTicket} />
 
 				<Box sx={{ padding: '40px' }}>
-					<Box mb={2}>
-						<Button
-							variant="contained"
-							color="primary"
-							onClick={() => setUpdatePopupOpen(true)}
-						>
-							Обновить тело задачи
-						</Button>
-					</Box>
+					{
+						!isUser && 	<Box mb={2}>
+							<Button
+								variant="contained"
+								color="primary"
+								onClick={() => setUpdatePopupOpen(true)}
+							>
+								Обновить тело задачи
+							</Button>
+						</Box>
+					}
 
 					<TicketComments ticketId={currentTicket.ticket_id} />
 				</Box>

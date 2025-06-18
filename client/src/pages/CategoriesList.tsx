@@ -54,7 +54,7 @@ const CategoriesList = () => {
 		try {
 			const response = await methods.categories.deleteCategory(id);
 			if (response.status === 200) {
-				setAlert({ type: 'success', isShowAlert: true, message: 'Category deleted successfully' });
+				setAlert({ type: 'success', isShowAlert: true, message: 'Категория удалена успешно' });
 				fetchCategories();
 			}
 		}

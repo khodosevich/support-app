@@ -10,6 +10,12 @@ import { NavLink } from 'react-router';
 const TicketsItem: React.FC<TicketsItemType> = ({ created_by, priority, created_at, ticket_id, title, username, }) => {
 	const theme = useTheme();
 
+	enum priorityName {
+		low = 'Низкий',
+		medium = 'Средний',
+		high = 'Выскокий',
+	}
+
 	return (
 		<Box sx={{
 			display: 'flex',
@@ -58,7 +64,7 @@ const TicketsItem: React.FC<TicketsItemType> = ({ created_by, priority, created_
 					</Typography>
 				</Box>
 				<TextInfo title={'Создано'} value={new Date(created_at).toLocaleDateString()}/>
-				<TextInfo title={'Приоритет'} value={priority}/>
+				<TextInfo title={'Приоритет'} value={priorityName[priority as keyof typeof priorityName] || 'Неизвестно'}/>
 				<TextInfo title={'Ticket ID'} value={ticket_id?.toString()}/>
 			</Box>
 		</Box>

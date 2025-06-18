@@ -40,6 +40,20 @@ const DashboardRecentTicket = () => {
 		loadTicket();
 	}, []);
 
+	const [currentCategories, setCurrentCategories] = useState<string>('');
+
+	useEffect(() => {
+		const fetch = async () => {
+			try {
+				const response = await methods.categories.getCategories();
+				setCurrentCategories(response.data.find((i: { category_id: number | null; }) => i.category_id === oldestTicket.category_id).name);
+			} catch {
+				console.log('Error fetching categories.');
+			}
+		}
+		fetch();
+	}, [oldestTicket.ticket_id]);
+
 	return (
 		<Box sx={{
 			display: 'flex',
@@ -75,7 +89,7 @@ const DashboardRecentTicket = () => {
 			}}>
 				<TextInfo title={'Имя пользователя'} value={oldestTicket?.username}/>
 				<TextInfo title={'Создано'} value={new Date(oldestTicket.created_at).toLocaleDateString()}/>
-				<TextInfo title={'Категория'} value={oldestTicket?.category_id?.toString() ?? 'Пока на доработке'}/>
+				<TextInfo title={'Категория'} value={currentCategories ?? 'Пока на доработке'}/>
 				<TextInfo title={'Описание'} value={oldestTicket.description} valueBold={false}/>
 			</Box>
 		</Box>

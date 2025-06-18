@@ -20,7 +20,7 @@ const TicketUpdatePopup = ({ open, onClose, ticket, onUpdate }: TicketUpdatePopu
 		try {
 			const response = await methods.tickets.updateTicket(ticket.ticket_id, { field, value });
 			if (response.status === 200) {
-				setAlert({ type: 'success', isShowAlert: true, message: 'Ticket updated successfully' });
+				setAlert({ type: 'success', isShowAlert: true, message: 'Заявка успешно обновлена' });
 				onUpdate();
 				onClose();
 			}
@@ -29,7 +29,7 @@ const TicketUpdatePopup = ({ open, onClose, ticket, onUpdate }: TicketUpdatePopu
 			if (error.response && error.response.data && error.response.data.error) {
 				setAlert({ type: 'error', isShowAlert: true, message: error.response.data.error });
 			} else {
-				setAlert({ type: 'error', isShowAlert: true, message: 'Error updating ticket' });
+				setAlert({ type: 'error', isShowAlert: true, message: 'Ошибка обновления заявки' });
 			}
 			console.error('Error updating ticket:', error);
 		}
